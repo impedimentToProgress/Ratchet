@@ -1,0 +1,25 @@
+*** newlib-2.2.0-new/newlib/libc/string/Makefile.in	2015-04-12 18:27:21.000000000 -0400
+--- newlib-2.2.0/newlib/libc/string/Makefile.in	2013-06-24 11:11:24.000000000 -0400
+*************** lib_a-memcmp.obj: memcmp.c
+*** 549,558 ****
+  	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-memcmp.obj `if test -f 'memcmp.c'; then $(CYGPATH_W) 'memcmp.c'; else $(CYGPATH_W) '$(srcdir)/memcmp.c'; fi`
+  
+  lib_a-memcpy.o: memcpy.c
+! 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -DPREFER_SIZE_OVER_SPEED -c -o lib_a-memcpy.o `test -f 'memcpy.c' || echo '$(srcdir)/'`memcpy.c
+  
+  lib_a-memcpy.obj: memcpy.c
+! 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -DPREFER_SIZE_OVER_SPEED -c -o lib_a-memcpy.obj `if test -f 'memcpy.c'; then $(CYGPATH_W) 'memcpy.c'; else $(CYGPATH_W) '$(srcdir)/memcpy.c'; fi`
+  
+  lib_a-memmove.o: memmove.c
+  	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-memmove.o `test -f 'memmove.c' || echo '$(srcdir)/'`memmove.c
+--- 549,558 ----
+  	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-memcmp.obj `if test -f 'memcmp.c'; then $(CYGPATH_W) 'memcmp.c'; else $(CYGPATH_W) '$(srcdir)/memcmp.c'; fi`
+  
+  lib_a-memcpy.o: memcpy.c
+! 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-memcpy.o `test -f 'memcpy.c' || echo '$(srcdir)/'`memcpy.c
+  
+  lib_a-memcpy.obj: memcpy.c
+! 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-memcpy.obj `if test -f 'memcpy.c'; then $(CYGPATH_W) 'memcpy.c'; else $(CYGPATH_W) '$(srcdir)/memcpy.c'; fi`
+  
+  lib_a-memmove.o: memmove.c
+  	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-memmove.o `test -f 'memmove.c' || echo '$(srcdir)/'`memmove.c

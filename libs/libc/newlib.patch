@@ -1,0 +1,200 @@
+diff --git a/newlib/libc/machine/arm/Makefile.in b/newlib/libc/machine/arm/Makefile.in
+index db65405..e75c6eb 100644
+--- a/newlib/libc/machine/arm/Makefile.in
++++ b/newlib/libc/machine/arm/Makefile.in
+@@ -81,7 +81,8 @@ lib_a_AR = $(AR) $(ARFLAGS)
+ @HAVE_THUMB1_FALSE@am__objects_3 = lib_a-strlen.$(OBJEXT)
+ @HAVE_THUMB1_TRUE@@OPT_SIZE_TRUE@am__objects_3 =  \
+ @HAVE_THUMB1_TRUE@@OPT_SIZE_TRUE@	lib_a-strlen.$(OBJEXT)
+-am_lib_a_OBJECTS = lib_a-setjmp.$(OBJEXT) lib_a-access.$(OBJEXT) \
++am_lib_a_OBJECTS = lib_a-setjmp.$(OBJEXT)
++#am_lib_a_OBJECTS = lib_a-setjmp.$(OBJEXT) lib_a-access.$(OBJEXT) \
+ 	lib_a-strcmp.$(OBJEXT) lib_a-strcpy.$(OBJEXT) $(am__objects_1) \
+ 	$(am__objects_2) $(am__objects_3) lib_a-strlen-armv7.$(OBJEXT) \
+ 	lib_a-aeabi_memcpy.$(OBJEXT) \
+@@ -230,14 +231,15 @@ noinst_LIBRARIES = lib.a
+ @HAVE_ARMV7A_FALSE@@HAVE_ARMV7M_TRUE@@OPT_SIZE_FALSE@MEMCPY_OBJ = $(lpfx)memcpy.o
+ @HAVE_ARMV7A_TRUE@@OPT_SIZE_FALSE@MEMCPY_OBJ = $(lpfx)memcpy.o
+ @OPT_SIZE_TRUE@MEMCPY_OBJ = 
+-lib_a_SOURCES = setjmp.S access.c strcmp.S strcpy.c \
++lib_a_SOURCES = setjmp.S
++#lib_a_SOURCES = setjmp.S access.c strcmp.S strcpy.c \
+ 	        $(MEMCPY_SRC) $(MEMCHR_SRC) $(STRLEN_SRC) \
+ 		strlen-armv7.S aeabi_memcpy.c aeabi_memcpy-armv7a.S
+ 
+ lib_a_CCASFLAGS = $(AM_CCASFLAGS)
+ lib_a_CFLAGS = $(AM_CFLAGS)
+-lib_a_LIBADD = $(STRLEN_OBJ) $(MEMCHR_OBJ) $(MEMCPY_OBJ)
+-lib_a_DEPENDENCIES = $(STRLEN_OBJ) $(MEMCHR_OBJ) $(MEMCPY_OBJ)
++lib_a_LIBADD = #$(STRLEN_OBJ) $(MEMCHR_OBJ) $(MEMCPY_OBJ)
++lib_a_DEPENDENCIES = #$(STRLEN_OBJ) $(MEMCHR_OBJ) $(MEMCPY_OBJ)
+ ACLOCAL_AMFLAGS = -I ../../.. -I ../../../..
+ CONFIG_STATUS_DEPENDENCIES = $(newlib_basedir)/configure.host
+ MEMCPY_DEP = memcpy-armv7a.S memcpy-armv7m.S
+diff --git a/newlib/libc/machine/arm/setjmp.S b/newlib/libc/machine/arm/setjmp.S
+index a65fbab..8bd3cf7 100644
+--- a/newlib/libc/machine/arm/setjmp.S
++++ b/newlib/libc/machine/arm/setjmp.S
+@@ -55,7 +55,6 @@
+    
+    For Thumb-2 do everything in Thumb mode.  */
+ 
+-#if defined(__ARM_ARCH_6M__)
+ /* ARMv6-M has to be implemented in Thumb mode.  */
+ 
+ .thumb
+@@ -72,11 +71,11 @@ SYM (setjmp):
+ 	mov	r5, sp
+ 	mov	r6, lr
+ 	stmia	r0!, {r1, r2, r3, r4, r5, r6}
+-	sub	r0, r0, #40
++	subs	r0, r0, #40
+ 	/* Restore callee-saved low regs.  */
+ 	ldmia	r0!, {r4, r5, r6, r7}
+ 	/* Return zero.  */
+-	mov	r0, #0
++	movs	r0, #0
+ 	bx lr
+ 
+ .thumb_func
+@@ -84,7 +83,7 @@ SYM (setjmp):
+ 	TYPE (longjmp)
+ SYM (longjmp):
+ 	/* Restore High regs.  */
+-	add	r0, r0, #16
++	adds	r0, r0, #16
+ 	ldmia	r0!, {r2, r3, r4, r5, r6}
+ 	mov	r8, r2
+ 	mov	r9, r3
+@@ -93,129 +92,12 @@ SYM (longjmp):
+ 	mov	sp, r6
+ 	ldmia	r0!, {r3} /* lr */
+ 	/* Restore low regs.  */
+-	sub	r0, r0, #40
++	subs	r0, r0, #40
+ 	ldmia	r0!, {r4, r5, r6, r7}
+ 	/* Return the result argument, or 1 if it is zero.  */
+ 	mov	r0, r1
+ 	bne	1f
+-	mov	r0, #1
++	movs	r0, #1
+ 1:
+ 	bx	r3
+ 
+-#else
+-
+-#ifdef __APCS_26__
+-#define RET	movs		pc, lr
+-#elif defined(__thumb2__)
+-#define RET	bx lr
+-#else
+-#define RET	tst		lr, #1; \
+-	        moveq		pc, lr ; \
+-.word           0xe12fff1e	/* bx lr */
+-#endif
+-
+-#ifdef __thumb2__
+-.macro COND where when 
+-	i\where	\when
+-.endm
+-#else
+-.macro COND where when 
+-.endm
+-#endif
+-
+-#if defined(__thumb2__)
+-.syntax unified
+-.macro MODE
+-	.thumb
+-	.thumb_func
+-.endm
+-.macro PROLOGUE name
+-.endm
+-
+-#elif defined(__thumb__)
+-#define	MODE		.thumb_func
+-.macro PROLOGUE name
+-	.code 16
+-	bx	pc
+-	nop	
+-	.code 32
+-SYM (.arm_start_of.\name):
+-.endm
+-#else /* Arm */
+-#define	MODE		.code 32
+-.macro PROLOGUE name
+-.endm
+-#endif
+-	
+-.macro FUNC_START name
+-	.text
+-	.align 2
+-	MODE
+-	.globl SYM (\name)
+-	TYPE (\name)
+-SYM (\name):
+-	PROLOGUE \name
+-.endm
+-
+-.macro FUNC_END name
+-	RET
+-	SIZE (\name)
+-.endm
+-	
+-/* --------------------------------------------------------------------
+-                 int setjmp (jmp_buf); 
+-   -------------------------------------------------------------------- */
+-	
+-	FUNC_START setjmp
+-
+-	/* Save all the callee-preserved registers into the jump buffer.  */
+-#ifdef __thumb2__
+-	mov		ip, sp
+-	stmea		a1!, { v1-v7, fp, ip, lr }
+-#else
+-	stmea		a1!, { v1-v7, fp, ip, sp, lr }
+-#endif
+-	
+-#if 0	/* Simulator does not cope with FP instructions yet.  */
+-#ifndef __SOFTFP__
+-	/* Save the floating point registers.  */
+-	sfmea		f4, 4, [a1]
+-#endif
+-#endif		
+-	/* When setting up the jump buffer return 0.  */
+-	mov		a1, #0
+-
+-	FUNC_END setjmp
+-	
+-/* --------------------------------------------------------------------
+-		volatile void longjmp (jmp_buf, int);
+-   -------------------------------------------------------------------- */
+-	
+-	FUNC_START longjmp
+-
+-	/* If we have stack extension code it ought to be handled here.  */
+-	
+-	/* Restore the registers, retrieving the state when setjmp() was called.  */
+-#ifdef __thumb2__
+-	ldmfd		a1!, { v1-v7, fp, ip, lr }
+-	mov		sp, ip
+-#else
+-	ldmfd		a1!, { v1-v7, fp, ip, sp, lr }
+-#endif
+-	
+-#if 0	/* Simulator does not cope with FP instructions yet.  */
+-#ifndef __SOFTFP__
+-	/* Restore floating point registers as well.  */
+-	lfmfd		f4, 4, [a1]
+-#endif
+-#endif	
+-	/* Put the return value into the integer result register.
+-	   But if it is zero then return 1 instead.  */	
+-	movs		a1, a2
+-#ifdef __thumb2__
+-	it		eq
+-#endif
+-	moveq		a1, #1
+-
+-	FUNC_END longjmp
+-#endif
